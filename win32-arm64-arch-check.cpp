@@ -37,11 +37,50 @@ std::vector <std::map <std::uint16_t, std::uint64_t>> SnapshotSnapdragon8cxGen3 
     }
 };
 
+struct PF {
+    const char * name;
+    DWORD        code;
+} pfs [] = {
+    { "CRYPTO", PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE },
+    { "CRC32", PF_ARM_V8_CRC32_INSTRUCTIONS_AVAILABLE },
+    { "ATOMIC(v8.1)", PF_ARM_V81_ATOMIC_INSTRUCTIONS_AVAILABLE },
+    { "DP(v8.2)", PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE       },
+    { "JSCVT(v8.3)", PF_ARM_V83_JSCVT_INSTRUCTIONS_AVAILABLE    },
+    { "LRCPC(v8.3)", PF_ARM_V83_LRCPC_INSTRUCTIONS_AVAILABLE    },
+    { "SVE", PF_ARM_SVE_INSTRUCTIONS_AVAILABLE          },
+    { "SVE2", PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE         },
+    { "SVE2.1", PF_ARM_SVE2_1_INSTRUCTIONS_AVAILABLE       },
+    { "SVE-AES", PF_ARM_SVE_AES_INSTRUCTIONS_AVAILABLE      },
+    { "SVE-PMULL128", PF_ARM_SVE_PMULL128_INSTRUCTIONS_AVAILABLE },
+    { "SVE-BITPERM", PF_ARM_SVE_BITPERM_INSTRUCTIONS_AVAILABLE  },
+    { "SVE-BF16", PF_ARM_SVE_BF16_INSTRUCTIONS_AVAILABLE     },
+    { "SVE-EBF16", PF_ARM_SVE_EBF16_INSTRUCTIONS_AVAILABLE    },
+    { "SVE-B16B16", PF_ARM_SVE_B16B16_INSTRUCTIONS_AVAILABLE   },
+    { "SVE-SHA3", PF_ARM_SVE_SHA3_INSTRUCTIONS_AVAILABLE     },
+    { "SVE-SM4", PF_ARM_SVE_SM4_INSTRUCTIONS_AVAILABLE      },
+    { "SVE-I8MM", PF_ARM_SVE_I8MM_INSTRUCTIONS_AVAILABLE     },
+    { "SVE-F32MM", PF_ARM_SVE_F32MM_INSTRUCTIONS_AVAILABLE    },
+    { "SVE-F64MM", PF_ARM_SVE_F64MM_INSTRUCTIONS_AVAILABLE    },
+};
+
 const char * FeatureName (AArch64::Feature feature) noexcept;
 
 int main () {
     SetLastError (0);
     if (AArch64::Initialize (/*SnapshotSnapdragon8cxGen3*/ /*SnapshotApple*/)) {
+
+        std::printf ("OS Processor Feature report:\n  ");
+        bool anypf = false;
+        for (auto & [name, code] : pfs) {
+            if (IsProcessorFeaturePresent (code)) {
+                std::printf ("%s ", name);
+                anypf = true;
+            }
+        }
+        if (!anypf) {
+            std::printf ("none");
+        }
+        std::printf ("\n\n");
 
         auto sets = AArch64::HeterogeneitySets ();
         std::printf ("%zu distinct ARM cores in %zu sets\n\n", AArch64::Heterogeneity (), sets.size ());
