@@ -63,11 +63,38 @@ struct PF {
     { "SVE-F64MM",      PF_ARM_SVE_F64MM_INSTRUCTIONS_AVAILABLE },
 };
 
-const char * FeatureName (AArch64::Feature feature) noexcept;
+void DisplayFeatureName (AArch64::Feature feature) noexcept {
+    if (feature.name && feature.name [0]) {
+        if (std::strchr (feature.name, '+')) {
+            
+            // for higher levels of the same feature, where higher level implies lower, the name contains all, separated by '+'
+            // e.g.: PMULL implies AES, so 'PMULL.name' returns "AES+PMULL"
+            
+            // but let's use space here
+
+            char temp [128];
+            for (auto i = 0u; i != sizeof temp; ++i) {
+                if (feature.name [i] == '+') {
+                    temp [i] = ' ';
+                } else {
+                    temp [i] = feature.name [i];
+                }
+                if (feature.name [i] == '\0')
+                    break;
+            }
+
+            std::printf (" %s", temp);
+        } else {
+            std::printf (" %s", feature.name);
+        }
+    } else {
+        std::printf (" [%04X:%u >= %u]", feature.reg, feature.offset, feature.minimum);
+    }
+}
 
 int main () {
     SetLastError (0);
-    if (AArch64::Initialize (/*SnapshotSnapdragon8cxGen3*/ /*SnapshotApple*/)) {
+    if (AArch64::Initialize (SnapshotApple)) { /*SnapshotSnapdragon8cxGen3*/ /*SnapshotApple*/
 
         std::printf ("OS Processor Feature report:\n  ");
         bool anypf = false;
@@ -112,7 +139,7 @@ int main () {
                         for (const auto & feature : level.features [s]) {
                             if (feature != AArch64::Features::Null) {
                                 if (AArch64::Check (processor, feature)) {
-                                    std::printf (" %s", FeatureName (feature));
+                                    DisplayFeatureName (feature);
                                     any = true;
                                 } else {
                                     missing = true;
@@ -130,7 +157,7 @@ int main () {
                         for (std::size_t s = 0; s != (std::size_t) AArch64::Strictness::Count; ++s) {
                             for (const auto & feature : level.features [s]) {
                                 if (!AArch64::Check (processor, feature)) {
-                                    std::printf (" %s", FeatureName (feature));
+                                    DisplayFeatureName (feature);
                                 }
                             }
                         }
@@ -150,117 +177,3 @@ int main () {
     }
     return GetLastError ();
 }
-
-// FEAT_TO_UINT
-//  - can we make this constexpr function that can be used in switch case below?
-//
-#define FEAT_TO_UINT(f) ((f.reg << 0) | (f.offset << 16) | (f.minimum << 24))
-
-const char * FeatureName (AArch64::Feature feature) noexcept {
-    using namespace AArch64;
-    switch (feature.raw) {
-        case FEAT_TO_UINT (Features::AES): return "AES";
-        case FEAT_TO_UINT (Features::PMULL): return "PMULL";
-        case FEAT_TO_UINT (Features::SHA1): return "SHA1";
-        case FEAT_TO_UINT (Features::SHA256): return "SHA256";
-        case FEAT_TO_UINT (Features::SHA512): return "SHA512";
-        case FEAT_TO_UINT (Features::CRC32): return "CRC32";
-        case FEAT_TO_UINT (Features::TME): return "TME";
-        case FEAT_TO_UINT (Features::SHA3): return "SHA3";
-        case FEAT_TO_UINT (Features::SM3): return "SM3";
-        case FEAT_TO_UINT (Features::SM4): return "SM4";
-        case FEAT_TO_UINT (Features::DotProd): return "DotProd";
-        case FEAT_TO_UINT (Features::FHM): return "FHM";
-        case FEAT_TO_UINT (Features::FlagM): return "FlagM";
-        case FEAT_TO_UINT (Features::FlagM2): return "FlagM2";
-        case FEAT_TO_UINT (Features::TLBIOS): return "TLBIOS";
-        case FEAT_TO_UINT (Features::TLBIRANGE): return "TLBIRANGE";
-        case FEAT_TO_UINT (Features::RNG): return "RNG";
-
-        case FEAT_TO_UINT (Features::FP16): return "FP16";
-        case FEAT_TO_UINT (Features::SVE): return "SVE";
-        case FEAT_TO_UINT (Features::SEL2): return "SEL2";
-        case FEAT_TO_UINT (Features::AMUv1): return "AMUv1";
-        case FEAT_TO_UINT (Features::AMUv1p1): return "AMUv1.1";
-        case FEAT_TO_UINT (Features::DIT): return "DIT";
-        case FEAT_TO_UINT (Features::CSV2): return "CSV2";
-        case FEAT_TO_UINT (Features::CSV2_2): return "CSV2.2";
-        case FEAT_TO_UINT (Features::CSV2_3): return "CSV2.3";
-        case FEAT_TO_UINT (Features::CSV3): return "CSV3";
-
-        case FEAT_TO_UINT (Features::TTCNP): return "TTCNP";
-        case FEAT_TO_UINT (Features::UAO): return "UAO";
-        case FEAT_TO_UINT (Features::LSMAOC): return "LSMAOC";
-        case FEAT_TO_UINT (Features::IESB): return "IESB";
-        case FEAT_TO_UINT (Features::LVA): return "LVA";
-        case FEAT_TO_UINT (Features::LVA3): return "LVA3";
-        case FEAT_TO_UINT (Features::CCIDX): return "CCIDX";
-        case FEAT_TO_UINT (Features::NV): return "NV";
-        case FEAT_TO_UINT (Features::NV2): return "NV2";
-        case FEAT_TO_UINT (Features::TTST): return "TTST";
-        case FEAT_TO_UINT (Features::LSE2): return "LSE2";
-        case FEAT_TO_UINT (Features::IDST): return "IDST";
-        case FEAT_TO_UINT (Features::IDTE3): return "IDTE3";
-        case FEAT_TO_UINT (Features::S2FWB): return "S2FWB";
-        case FEAT_TO_UINT (Features::TTL): return "TTL";
-        case FEAT_TO_UINT (Features::BBM): return "BBM";
-        case FEAT_TO_UINT (Features::BBM_L2): return "BBM_L2";
-        case FEAT_TO_UINT (Features::E0PD): return "E0PD";
-
-        case FEAT_TO_UINT (Features::LSE): return "LSE";
-        case FEAT_TO_UINT (Features::LSE128): return "LSE128";
-        case FEAT_TO_UINT (Features::VHE): return "VHE";
-        case FEAT_TO_UINT (Features::HPDS): return "HPDS";
-        case FEAT_TO_UINT (Features::LOR): return "LOR";
-        case FEAT_TO_UINT (Features::PAN): return "PAN";
-
-        case FEAT_TO_UINT (Features::RDM): return "RDM";
-        case FEAT_TO_UINT (Features::DPB): return "DPB";
-        case FEAT_TO_UINT (Features::DPB2): return "DPB2";
-        case FEAT_TO_UINT (Features::PAuth): return "PAuth";
-        case FEAT_TO_UINT (Features::JSCVT): return "JSCVT";
-        case FEAT_TO_UINT (Features::FCMA): return "FCMA";
-        case FEAT_TO_UINT (Features::PAN2): return "PAN2";
-        //case FEAT_TO_UINT (Features::UAO): return "UAO";
-        
-        case FEAT_TO_UINT (Features::RAS): return "RAS";
-        case FEAT_TO_UINT (Features::RASv1p1): return "RASv1.1";
-        case FEAT_TO_UINT (Features::RASv2): return "RASv2";
-
-        //case FEAT_TO_UINT (Features::TTCNP): return "TTCNP";
-        case FEAT_TO_UINT (Features::XNX): return "XNX";
-        
-        case FEAT_TO_UINT (Features::Debugv8p1): return "Debug8.1";
-        case FEAT_TO_UINT (Features::Debugv8p2): return "Debug8.2";
-        case FEAT_TO_UINT (Features::Debugv8p4): return "Debug8.4";
-        case FEAT_TO_UINT (Features::Debugv8p8): return "Debug8.8";
-        case FEAT_TO_UINT (Features::Debugv8p9): return "Debug8.9";
-
-        case FEAT_TO_UINT (Features::LRCPC): return "LRCPC";
-        case FEAT_TO_UINT (Features::LRCPC2): return "LRCPC2";
-        case FEAT_TO_UINT (Features::LRCPC3): return "LRCPC3";
-
-        case FEAT_TO_UINT (Features::BTI): return "BTI";
-        case FEAT_TO_UINT (Features::SSBS): return "SSBS";
-        case FEAT_TO_UINT (Features::SSBS2): return "SSBS2";
-        case FEAT_TO_UINT (Features::MTE): return "MTE";
-        case FEAT_TO_UINT (Features::MTE2): return "MTE2";
-        case FEAT_TO_UINT (Features::MTE3): return "MTE3";
-        case FEAT_TO_UINT (Features::SME): return "SME";
-        case FEAT_TO_UINT (Features::SME2): return "SME2";
-        case FEAT_TO_UINT (Features::RNDS): return "RNDS";
-        case FEAT_TO_UINT (Features::NMI): return "NMI";
-        case FEAT_TO_UINT (Features::GCS): return "GCS";
-        case FEAT_TO_UINT (Features::THE): return "THE";
-        case FEAT_TO_UINT (Features::DoubleFault2): return "DoubleFault2";
-        case FEAT_TO_UINT (Features::PFAR): return "PFAR";
-    }
-
-    //return nullptr;
-
-    static char debug [64];
-    snprintf (debug, 64, "[%04X:%u >= %u]", feature.reg, feature.offset, feature.minimum);
-    return debug;
-}
-
-#undef FEAT_TO_UINT
