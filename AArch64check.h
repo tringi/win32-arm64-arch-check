@@ -240,15 +240,23 @@ namespace AArch64 {
         static constexpr Feature v9_0_Relaxed [] = { Features::FP16, Features::RAS };
         static constexpr Feature v9_0_Strict  [] = { Features::FRINTTS };
 
-        static constexpr Feature v9_1_Minimal [] = { Features::Null };
+        static constexpr Feature v9_1_Minimal [] = { Features::SVE };
         static constexpr Feature v9_1_Relaxed [] = { Features::Null };
-        static constexpr Feature v9_1_Strict  [] = { Features::BF16 };
+        static constexpr Feature v9_1_Strict  [] = { Features::Null };
 
-        /*static constexpr Feature v9_4_Minimal [] = { Features::CSSC };
+        static constexpr Feature v9_2_Minimal [] = { Features::SVE };
+        static constexpr Feature v9_2_Relaxed [] = { Features::Null };
+        static constexpr Feature v9_2_Strict  [] = { Features::Null };
+
+        static constexpr Feature v9_3_Minimal [] = { Features::SVE };
+        static constexpr Feature v9_3_Relaxed [] = { Features::Null };
+        static constexpr Feature v9_3_Strict  [] = { Features::Null };
+
+        static constexpr Feature v9_4_Minimal [] = { Features::SVE, Features::CSSC };
         static constexpr Feature v9_4_Relaxed [] = { Features::Null };
-        static constexpr Feature v9_4_Strict  [] = { Features::CHK };
+        static constexpr Feature v9_4_Strict  [] = { Features::Null }; // Features::CHK !!
 
-        static constexpr Feature v9_5_Minimal [] = { Features::ETS3 };
+        /*static constexpr Feature v9_5_Minimal [] = { Features::ETS3 };
         static constexpr Feature v9_5_Relaxed [] = { Features::Null };
         static constexpr Feature v9_5_Strict  [] = { Features::ASID2, Features::CPA, Features::STEP2 };
 
@@ -256,7 +264,6 @@ namespace AArch64 {
         static constexpr Feature v9_6_Relaxed [] = { Features::Null };
         static constexpr Feature v9_6_Strict  [] = { Features::FPRCVT, Features::LSUI, Features::OCCMO, Features::SRMASK, Features::UINJ };
         */
-
         //static constexpr Feature Optional [] = { Features::... };
     }
 
@@ -273,22 +280,24 @@ namespace AArch64 {
 
     struct Level {
         WORD name; // e.g. 0x08'01 for ARMv8.1
-        WORD baseline;
         std::span <const Feature> features [(std::size_t) Strictness::Count];
     };
 
     static constexpr Level Levels [] = {
-        { 0x801, 0x000, { Sets::v8_1_Minimal, Sets::v8_1_Relaxed, Sets::v8_1_Strict } },
-        { 0x802, 0x801, { Sets::v8_2_Minimal, Sets::v8_2_Relaxed, Sets::v8_2_Strict } },
-        { 0x803, 0x802, { Sets::v8_3_Minimal, Sets::v8_3_Relaxed, Sets::v8_3_Strict } },
-        { 0x804, 0x803, { Sets::v8_4_Minimal, Sets::v8_4_Relaxed, Sets::v8_4_Strict } },
-        { 0x805, 0x804, { Sets::v8_5_Minimal, Sets::v8_5_Relaxed, Sets::v8_5_Strict } },
-        { 0x806, 0x805, { Sets::v8_6_Minimal, Sets::v8_6_Relaxed, Sets::v8_6_Strict } },
-        { 0x807, 0x806, { Sets::v8_7_Minimal, Sets::v8_7_Relaxed, Sets::v8_7_Strict } },
-        { 0x808, 0x807, { Sets::v8_8_Minimal, Sets::v8_8_Relaxed, Sets::v8_8_Strict } },
-        { 0x809, 0x808, { Sets::v8_9_Minimal, Sets::v8_9_Relaxed, Sets::v8_9_Strict } },
-        { 0x900, 0x806, { Sets::v9_0_Minimal, Sets::v9_0_Relaxed, Sets::v9_0_Strict } },
-        { 0x901, 0x900, { Sets::v9_1_Minimal, Sets::v9_1_Relaxed, Sets::v9_1_Strict } },
+        { 0x801, { Sets::v8_1_Minimal, Sets::v8_1_Relaxed, Sets::v8_1_Strict } },
+        { 0x802, { Sets::v8_2_Minimal, Sets::v8_2_Relaxed, Sets::v8_2_Strict } },
+        { 0x803, { Sets::v8_3_Minimal, Sets::v8_3_Relaxed, Sets::v8_3_Strict } },
+        { 0x804, { Sets::v8_4_Minimal, Sets::v8_4_Relaxed, Sets::v8_4_Strict } },
+        { 0x805, { Sets::v8_5_Minimal, Sets::v8_5_Relaxed, Sets::v8_5_Strict } },
+        { 0x806, { Sets::v8_6_Minimal, Sets::v8_6_Relaxed, Sets::v8_6_Strict } },
+        { 0x807, { Sets::v8_7_Minimal, Sets::v8_7_Relaxed, Sets::v8_7_Strict } },
+        { 0x808, { Sets::v8_8_Minimal, Sets::v8_8_Relaxed, Sets::v8_8_Strict } },
+        { 0x809, { Sets::v8_9_Minimal, Sets::v8_9_Relaxed, Sets::v8_9_Strict } },
+        { 0x900, { Sets::v9_0_Minimal, Sets::v9_0_Relaxed, Sets::v9_0_Strict } },
+        { 0x901, { Sets::v9_1_Minimal, Sets::v9_1_Relaxed, Sets::v9_1_Strict } },
+        { 0x902, { Sets::v9_2_Minimal, Sets::v9_2_Relaxed, Sets::v9_2_Strict } },
+        { 0x903, { Sets::v9_3_Minimal, Sets::v9_3_Relaxed, Sets::v9_3_Strict } },
+        { 0x904, { Sets::v9_4_Minimal, Sets::v9_4_Relaxed, Sets::v9_4_Strict } },
     };
 
     // Initialize

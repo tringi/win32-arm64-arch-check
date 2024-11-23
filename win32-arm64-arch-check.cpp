@@ -94,11 +94,14 @@ void DisplayFeatureName (AArch64::Feature feature) noexcept {
 
 int main () {
     SetLastError (0);
-    if (AArch64::Initialize (SnapshotApple)) { /*SnapshotSnapdragon8cxGen3*/ /*SnapshotApple*/
+    if (AArch64::Initialize ()) { // SnapshotSnapdragon8cxGen3 or SnapshotApple
 
         std::printf ("OS Processor Feature report:\n  ");
         bool anypf = false;
         for (auto & [name, code] : pfs) {
+            if (code == PF_ARM_SVE_INSTRUCTIONS_AVAILABLE) {
+                std::printf ("\n  ");
+            }
             if (IsProcessorFeaturePresent (code)) {
                 std::printf ("%s ", name);
                 anypf = true;
@@ -110,7 +113,10 @@ int main () {
         std::printf ("\n\n");
 
         auto sets = AArch64::HeterogeneitySets ();
-        std::printf ("%zu distinct ARM cores in %zu sets\n\n", AArch64::Heterogeneity (), sets.size ());
+        auto heterogeneity = AArch64::Heterogeneity ();
+        if (sets.size () > 1 || heterogeneity > 1) {
+            std::printf ("%zu distinct ARM cores in %zu sets\n\n", heterogeneity, sets.size ());
+        }
 
         UINT first = 0;
         for (UINT cpu_set = 0u; cpu_set != sets.size (); ++cpu_set) {

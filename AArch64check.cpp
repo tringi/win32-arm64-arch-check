@@ -127,6 +127,14 @@ namespace {
         }
         return true;
     }
+
+    AArch64::Level GetLevel (WORD name) {
+        for (const auto & level : AArch64::Levels) {
+            if (level.name == name)
+                return level;
+        }
+        return {};
+    }
 }
 
 WORD AArch64::Determine (UINT processor, Strictness strictness) noexcept {
@@ -134,14 +142,22 @@ WORD AArch64::Determine (UINT processor, Strictness strictness) noexcept {
     // TODO: IsKnownSoC -> value
 
     if (AnyRegisterData ()) {
-        WORD match = 0x08'00;
-
-        // TODO: rewrite to properly traverse into 9.X
+        WORD match = 0x8'00;
 
         for (const auto & level : Levels) {
-            if (!ValidateLevel (level, processor, strictness))
-                return match;
+            if (!ValidateLevel (level, processor, strictness)) {
 
+                // 8.5 can be 9.0, 8.6 can be 9.1, etc.
+                switch (match) {
+                    case 0x8'09: if (ValidateLevel (GetLevel (0x9'04), processor, strictness)) return 0x9'04; [[ fallthrough ]];
+                    case 0x8'08: if (ValidateLevel (GetLevel (0x9'03), processor, strictness)) return 0x9'03; [[ fallthrough ]];
+                    case 0x8'07: if (ValidateLevel (GetLevel (0x9'02), processor, strictness)) return 0x9'02; [[ fallthrough ]];
+                    case 0x8'06: if (ValidateLevel (GetLevel (0x9'01), processor, strictness)) return 0x9'01; [[ fallthrough ]];
+                    case 0x8'05: if (ValidateLevel (GetLevel (0x9'00), processor, strictness)) return 0x9'00;
+                }
+
+                return match;
+            }
             match = level.name;
         }
 
