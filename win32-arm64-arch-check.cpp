@@ -63,27 +63,32 @@ struct PF {
     { "SVE-F64MM",      PF_ARM_SVE_F64MM_INSTRUCTIONS_AVAILABLE },
 };
 
-void DisplayFeatureName (AArch64::Feature feature) noexcept {
+void DisplayFeatureName (AArch64::Feature feature, bool rewrite) noexcept {
     if (feature.name && feature.name [0]) {
-        if (std::strchr (feature.name, '+')) {
+        if (auto psz_plus = std::strchr (feature.name, '+')) {
             
-            // for higher levels of the same feature, where higher level implies lower, the name contains all, separated by '+'
-            // e.g.: PMULL implies AES, so 'PMULL.name' returns "AES+PMULL"
-            
-            // but let's use space here
+            if (rewrite) {
 
-            char temp [128];
-            for (auto i = 0u; i != sizeof temp; ++i) {
-                if (feature.name [i] == '+') {
-                    temp [i] = ' ';
-                } else {
-                    temp [i] = feature.name [i];
+                // for higher levels of the same feature, where higher level implies lower, the name contains all, separated by '+'
+                // e.g.: PMULL implies AES, so 'PMULL.name' returns "AES+PMULL"
+
+                // but let's use space here
+
+                char temp [128];
+                for (auto i = 0u; i != sizeof temp; ++i) {
+                    if (feature.name [i] == '+') {
+                        temp [i] = ' ';
+                    } else {
+                        temp [i] = feature.name [i];
+                    }
+                    if (feature.name [i] == '\0')
+                        break;
                 }
-                if (feature.name [i] == '\0')
-                    break;
-            }
 
-            std::printf (" %s", temp);
+                std::printf (" %s", temp);
+            } else {
+                std::printf (" %s", psz_plus + 1);
+            }
         } else {
             std::printf (" %s", feature.name);
         }
@@ -144,7 +149,7 @@ int main () {
                         for (const auto & feature : level.features [s]) {
                             if (feature != AArch64::Features::Null) {
                                 if (AArch64::Check (processor, feature)) {
-                                    DisplayFeatureName (feature);
+                                    DisplayFeatureName (feature, true);
                                     any = true;
                                 } else {
                                     missing = true;
@@ -162,7 +167,7 @@ int main () {
                         for (std::size_t s = 0; s != (std::size_t) AArch64::Strictness::Count; ++s) {
                             for (const auto & feature : level.features [s]) {
                                 if (!AArch64::Check (processor, feature)) {
-                                    DisplayFeatureName (feature);
+                                    DisplayFeatureName (feature, false);
                                 }
                             }
                         }
