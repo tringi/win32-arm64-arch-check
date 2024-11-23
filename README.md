@@ -26,3 +26,14 @@ for those levels, optionally excluding features that are useless for user mode (
 * ARMv8.0 is the baseline
 * CRC32, AES and some other optional features of ARMv8.0 are always present, because they are mandatory for Windows on ARM
 * Using Microsoft Visual Studio 2022 (17.11) or newer
+
+## Results
+
+CPU | Advertised | Strict | Relaxed | Minimal | Remark
+-|-|-|-|-|-
+Cobalt 100 (Neoverse N2) | ARMv9.0 | v8.0 | v8.5 | v9.0 | Azure
+Ampere Altra | ARMv8.2 | v8.0 | v8.2 | v8.2 | Azure
+Snapdragon 7c | ARMv8.2 | v8.0 | v8.2 | v8.2 | Acer Aspire 1 A114-61
+Snapdragon 835 | ARMv8.0 | v8.0 | v8.0 | v8.0 | ASUS NovaGo
+Apple ??? | ARMv8.4 | v8.0 | v8.2 | v8.2 | *only on register data obtained from github*
+Snapdragon 8cx Gen3 | ARMv8.4 | v8.0 | v8.3 | v8.4 | *only on register data obtained from internet*
