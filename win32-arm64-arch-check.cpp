@@ -113,9 +113,8 @@ int main () {
         std::printf ("\n\n");
 
         auto sets = AArch64::HeterogeneitySets ();
-        auto heterogeneity = AArch64::Heterogeneity ();
-        if (sets.size () > 1 || heterogeneity > 1) {
-            std::printf ("%zu distinct ARM cores in %zu sets\n\n", heterogeneity, sets.size ());
+        if (sets.size () > 1) {
+            std::printf ("%zu distinct ARM cores in %zu sets\n\n", AArch64::Heterogeneity (), sets.size ());
         }
 
         UINT first = 0;
